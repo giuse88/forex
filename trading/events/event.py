@@ -12,10 +12,11 @@ class BaseEvent(Event):
     def __str__(self):
         return "Base Event"
 
-class TickEvent(BaseEvent):
+class tick(BaseEvent):
 
   def __init__(self, **args):
       super(BaseEvent, self).__init__()
+      self.type = 'Tick'
       self.ask = args['ask']
       self.bid = args['bid']
       self.timestamp = args['timestamp']
@@ -130,7 +131,7 @@ class FillEvent(Event):
 if __name__ == "__main__":
     event = BaseEvent();
     print(str(event))
-    print(str(TickEvent(ask=1.11767, bid=1.11763, ask_volume=2.3200, bid_volume=1.0000, timestamp=54353, symbol='USDEUR')))
+    print(str(tick(ask=1.11767, bid=1.11763, ask_volume=2.3200, bid_volume=1.0000, timestamp=54353, symbol='USDEUR')))
 #    print("Signal event:" + str(SignalEvent('EURUSD', 'LONG', 5.5)))
 #    print("Order event:" + str(OrderEvent('EURUSD', 'MKT', 1, 'BUY')))
 #    print("Fill event:" + str(FillEvent('EURUSD', 'SWISS', 1, 'BUY', 2.5)))

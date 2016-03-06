@@ -2,12 +2,12 @@ from circuits import Debugger
 from datetime import timedelta, datetime
 import glob, csv, os, time
 
-from DataSource import *
 from trading.utils.validation import isFloat, isValidDate
-from trading.events.event import TickEvent
+from trading.events.event import tick as TickEvent
 from trading.utils.time import toUTCTimestamp
+from trading.DataSource.DataSource import DataSource
 
-class CVSTickDataSource(DataSource):
+class CSVTickDataSource(DataSource):
   COLUMN_TIME = 0
   COLUMN_ASK= 1
   COLUMN_BID= 2
@@ -15,7 +15,7 @@ class CVSTickDataSource(DataSource):
   COLUMN_BID_VOLUME = 4
 
   def __init__(self, folder, symbol, file_extension='*.csv', frequency=None):
-    super(CVSTickDataSource, self).__init__()
+    super(CSVTickDataSource, self).__init__()
     self.folder = folder
     self.full_path = os.path.join(os.getcwd(), self.folder)
     self.frequency = frequency
@@ -40,7 +40,7 @@ class CVSTickDataSource(DataSource):
     if len(row) != 5:
       return False
 
-    if not isValidDate(row[CVSTickDataSource.COLUMN_TIME]):
+    if not isValidDate(row[CSVTickDataSource.COLUMN_TIME]):
       return False
 
     for x in row[1:]:
@@ -51,21 +51,20 @@ class CVSTickDataSource(DataSource):
 
   def _forge_tick(self, row):
     tick = {}
-    tick['ask'] = float(row[CVSTickDataSource.COLUMN_ASK])
-    tick['bid'] = float(row[CVSTickDataSource.COLUMN_BID])
-    tick['ask_volume'] = float(row[CVSTickDataSource.COLUMN_ASK_VOLUME])
-    tick['bid_volume'] = float(row[CVSTickDataSource.COLUMN_BID_VOLUME])
-    tick['timestamp'] = toUTCTimestamp(row[CVSTickDataSource.COLUMN_TIME])
+    tick['ask'] = float(row[CSVTickDataSource.COLUMN_ASK])
+    tick['bid'] = float(row[CSVTickDataSource.COLUMN_BID])
+    tick['ask_volume'] = float(row[CSVTickDataSource.COLUMN_ASK_VOLUME])
+    tick['bid_volume'] = float(row[CSVTickDataSource.COLUMN_BID_VOLUME])
+    tick['timestamp'] = toUTCTimestamp(row[CSVTickDataSource.COLUMN_TIME])
     tick['symbol'] = self.symbol
     return TickEvent(**tick)
 
   def _process_row(self, row):
     if(self._validate_row(row)):
-        print(self._forge_tick(row))
-
+      print("Sending...");
+      self.fire(self._forge_tick(row))
 
 if __name__ == '__main__':
     """ Test csv tick data source with mock data"""
-
-    source = CVSTickDataSource('../data/', 'EURUSD', '*.small.csv', 0.25)
+    source = CSVTickDataSource('../data/', 'EURUSD', '*.small.csv', 0.25)
     (Debugger() + source).run()
