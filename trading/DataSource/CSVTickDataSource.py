@@ -4,7 +4,8 @@ import glob, csv, os, time
 
 from DataSource import *
 from trading.utils.validation import isFloat, isValidDate
-from trading.events.event import MarketEvent
+from trading.events.event import TickEvent
+from trading.utils.time import toUTCTimestamp
 
 class CVSTickDataSource(DataSource):
   COLUMN_TIME = 0
@@ -13,12 +14,13 @@ class CVSTickDataSource(DataSource):
   COLUMN_ASK_VOLUME = 3
   COLUMN_BID_VOLUME = 4
 
-  def __init__(self, folder, file_extension='*.csv', frequency=None):
+  def __init__(self, folder, symbol, file_extension='*.csv', frequency=None):
     super(CVSTickDataSource, self).__init__()
     self.folder = folder
     self.full_path = os.path.join(os.getcwd(), self.folder)
     self.frequency = frequency
     self.file_extension = file_extension
+    self.symbol = symbol
 
   def started(self, *args):
     print("CSVTick  data source")
@@ -47,12 +49,23 @@ class CVSTickDataSource(DataSource):
 
     return True
 
+  def _forge_tick(self, row):
+    tick = {}
+    tick['ask'] = float(row[CVSTickDataSource.COLUMN_ASK])
+    tick['bid'] = float(row[CVSTickDataSource.COLUMN_BID])
+    tick['ask_volume'] = float(row[CVSTickDataSource.COLUMN_ASK_VOLUME])
+    tick['bid_volume'] = float(row[CVSTickDataSource.COLUMN_BID_VOLUME])
+    tick['timestamp'] = toUTCTimestamp(row[CVSTickDataSource.COLUMN_TIME])
+    tick['symbol'] = self.symbol
+    return TickEvent(**tick)
+
   def _process_row(self, row):
     if(self._validate_row(row)):
-      print(row)
+        print(self._forge_tick(row))
+
 
 if __name__ == '__main__':
     """ Test csv tick data source with mock data"""
 
-    source = CVSTickDataSource('../data/', '*.small.csv', 0.25)
+    source = CVSTickDataSource('../data/', 'EURUSD', '*.small.csv', 0.25)
     (Debugger() + source).run()

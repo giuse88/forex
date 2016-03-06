@@ -1,10 +1,33 @@
 from datetime import datetime
+from trading.utils.time import stringify
 
-class Event:
+from circuits import Event
+
+class BaseEvent(Event):
+
+    def __init__(self):
+      super(BaseEvent, self).__init__()
+      self.event_timestamp = datetime.utcnow()
+
     def __str__(self):
-        return "Event"
+        return "Base Event"
 
-class MarketEvent(Event):
+class TickEvent(BaseEvent):
+
+  def __init__(self, **args):
+      super(BaseEvent, self).__init__()
+      self.ask = args['ask']
+      self.bid = args['bid']
+      self.timestamp = args['timestamp']
+      self.ask_volume = args['ask_volume']
+      self.bid_volume = args['bid_volume']
+      self.symbol = args['symbol']
+
+  def __str__(self):
+    return "Tick({:s}): Symbol={:s}, Ask={:.2f} Bid {:.2f} Ask volume {:.2f} Bid volume {:.2f} " \
+            .format(stringify(self.timestamp), self.symbol, self.ask, self.bid, self.ask_volume, self.bid_volume )
+
+class MarketEvent(BaseEvent):
 
     def __init__(self):
         self.type = 'MARKET'
@@ -12,6 +35,7 @@ class MarketEvent(Event):
 
     def __str__(self):
         return self.type + " generated at " + self.timestamp
+
 
 class SignalEvent(Event):
     """
@@ -104,8 +128,10 @@ class FillEvent(Event):
 
 
 if __name__ == "__main__":
-    event = Event();
-    print("Base event:" + str(event))
-    print("Signal event:" + str(SignalEvent('EURUSD', 'LONG', 5.5)))
-    print("Order event:" + str(OrderEvent('EURUSD', 'MKT', 1, 'BUY')))
-    print("Fill event:" + str(FillEvent('EURUSD', 'SWISS', 1, 'BUY', 2.5)))
+    event = BaseEvent();
+    print(str(event))
+    print(str(TickEvent(ask=1.11767, bid=1.11763, ask_volume=2.3200, bid_volume=1.0000, timestamp=54353, symbol='USDEUR')))
+#    print("Signal event:" + str(SignalEvent('EURUSD', 'LONG', 5.5)))
+#    print("Order event:" + str(OrderEvent('EURUSD', 'MKT', 1, 'BUY')))
+#    print("Fill event:" + str(FillEvent('EURUSD', 'SWISS', 1, 'BUY', 2.5)))
+
