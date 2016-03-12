@@ -7,7 +7,10 @@ class Event(object):
 
 class Component(object):
     _emitter = EventEmitter()
+
     def __init__(self):
+        super(Component, self).__init__()
+
         for attr_name in dir(self):
             method = getattr(self, attr_name)
             if hasattr(method, EVENT_LIST_IDENTIFIER):

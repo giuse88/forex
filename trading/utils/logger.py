@@ -1,11 +1,14 @@
 import logging
 import sys
 
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
+class Logger(object):
+    TEMPLATE = '%(asctime)s - %(levelname)s - %(name)s -  %(message)s'
 
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-root.addHandler(ch)
+    def __init__(self):
+        super(Logger, self).__init__()
+        self.logger = logging.getLogger(self.__class__.__name__)
+        out_hdlr = logging.StreamHandler(sys.stdout)
+        out_hdlr.setFormatter(logging.Formatter(Logger.TEMPLATE))
+        out_hdlr.setLevel(logging.INFO)
+        self.logger.addHandler(out_hdlr)
+        self.logger.setLevel(logging.INFO)
