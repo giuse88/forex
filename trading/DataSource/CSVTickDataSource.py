@@ -59,7 +59,6 @@ class CSVTickDataSource(DataSource):
   def _process_row(self, row):
     if(self._validate_row(row)):
       event = self._forge_tick(row)
-      print("Sending :  " + str(event));
       self.emit(event)
 
 if __name__ == '__main__':

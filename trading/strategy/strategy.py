@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 from trading.emitter.component import Component, listen_on
-from trading.events.event import SignalEvent
+from trading.events.event import Signal
 
 class Strategy(Component):
     __metaclass__ = ABCMeta
@@ -23,12 +23,21 @@ class BuyEveryNTicks(Component):
 
     @listen_on('tick')
     def on_tick(self, event):
+        print("Processing " + str(event))
         if event.symbol is self.symbol:
             self.tick_counter = ( self.tick_counter + 1 ) % self.ticks
             self.calculate_signals()
 
     def calculate_signals(self):
         if self.tick_counter is 0 :
-            signal = SignalEvent(self.symbol, 'LONG', 0.5)
-            print("Emiting : " + str(signal))
+            signal = Signal(self.symbol, 'LONG', 0.5)
             self.emit(signal)
+
+class Portafolio(Component):
+
+    def __init__(self, symbol):
+        super(Portafolio, self).__init__()
+
+    @listen_on('signal')
+    def on_signal(self, signal):
+        print("Processing " + str(signal))

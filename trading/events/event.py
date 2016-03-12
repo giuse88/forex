@@ -37,7 +37,7 @@ class MarketEvent(BaseEvent):
         return self.type + " generated at " + self.timestamp
 
 
-class SignalEvent(Event):
+class Signal(Event):
     """
     Handles the event of sending a Signal from a Strategy object.
     This is received by a Portfolio object and acted upon.
