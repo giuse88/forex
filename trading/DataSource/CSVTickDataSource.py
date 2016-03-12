@@ -5,8 +5,9 @@ from trading.utils.validation import isFloat, isValidDate
 from trading.events.event import Tick
 from trading.utils.time import toUTCTimestamp
 from trading.DataSource.DataSource import DataSource
+from trading.utils.logger import Logger
 
-class CSVTickDataSource(DataSource):
+class CSVTickDataSource(DataSource, Logger):
   COLUMN_TIME = 0
   COLUMN_ASK= 1
   COLUMN_BID= 2
@@ -15,6 +16,8 @@ class CSVTickDataSource(DataSource):
 
   def __init__(self, folder, symbol, file_extension='*.csv', frequency=None):
     super(CSVTickDataSource, self).__init__()
+    self.logger.info("Strategy object created")
+
     self.folder = folder
     self.full_path = os.path.join(os.getcwd(), self.folder)
     self.frequency = frequency

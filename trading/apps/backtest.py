@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from trading.strategy.strategy import BuyEveryNTicks, Portafolio
+from trading.strategy.strategy import BuyEveryNTicks, Portafolio, Executor
 from trading.DataSource.CSVTickDataSource import CSVTickDataSource
 
 class BackTest(object):
@@ -10,6 +10,7 @@ class BackTest(object):
       self.source = CSVTickDataSource('../data/', symbol, '*.small.csv')
       self.strategy = BuyEveryNTicks(symbol, 3)
       self.portafolio = Portafolio(symbol)
+      self.executor = Executor()
 
   def start(self):
       self.source.read_data()

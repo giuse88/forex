@@ -64,7 +64,7 @@ class Signal(Event):
     def __str__(self):
         return "Signal: Symbol={:s}, Type={:s}, Strenght={:.2f}".format(self.symbol, self.signal_type, self.strength)
 
-class OrderEvent(Event):
+class Order(Event):
     """
     Handles the event of sending an Order to an execution system.
     The order contains a symbol (e.g. GOOG), a type (market or limit),
