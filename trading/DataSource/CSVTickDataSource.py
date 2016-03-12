@@ -1,9 +1,8 @@
-from circuits import Debugger
 from datetime import timedelta, datetime
 import glob, csv, os, time
 
 from trading.utils.validation import isFloat, isValidDate
-from trading.events.event import tick as TickEvent
+from trading.events.event import tick
 from trading.utils.time import toUTCTimestamp
 from trading.DataSource.DataSource import DataSource
 
@@ -22,9 +21,7 @@ class CSVTickDataSource(DataSource):
     self.file_extension = file_extension
     self.symbol = symbol
 
-  def started(self, *args):
-    print("CSVTick  data source")
-
+  def read_data(self, *args):
     for csv_path in self._find_csv_files_within_folder():
       with open(csv_path, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
@@ -50,21 +47,22 @@ class CSVTickDataSource(DataSource):
     return True
 
   def _forge_tick(self, row):
-    tick = {}
-    tick['ask'] = float(row[CSVTickDataSource.COLUMN_ASK])
-    tick['bid'] = float(row[CSVTickDataSource.COLUMN_BID])
-    tick['ask_volume'] = float(row[CSVTickDataSource.COLUMN_ASK_VOLUME])
-    tick['bid_volume'] = float(row[CSVTickDataSource.COLUMN_BID_VOLUME])
-    tick['timestamp'] = toUTCTimestamp(row[CSVTickDataSource.COLUMN_TIME])
-    tick['symbol'] = self.symbol
-    return TickEvent(**tick)
+    _tick = {}
+    _tick['ask'] = float(row[CSVTickDataSource.COLUMN_ASK])
+    _tick['bid'] = float(row[CSVTickDataSource.COLUMN_BID])
+    _tick['ask_volume'] = float(row[CSVTickDataSource.COLUMN_ASK_VOLUME])
+    _tick['bid_volume'] = float(row[CSVTickDataSource.COLUMN_BID_VOLUME])
+    _tick['timestamp'] = toUTCTimestamp(row[CSVTickDataSource.COLUMN_TIME])
+    _tick['symbol'] = self.symbol
+    return tick(**_tick)
 
   def _process_row(self, row):
     if(self._validate_row(row)):
-      print("Sending...");
-      self.fire(self._forge_tick(row))
+      event = self._forge_tick(row)
+      self.emit(event)
+      print("Sent :  " + str(event));
 
 if __name__ == '__main__':
     """ Test csv tick data source with mock data"""
     source = CSVTickDataSource('../data/', 'EURUSD', '*.small.csv', 0.25)
-    (Debugger() + source).run()
+    source.read_data()

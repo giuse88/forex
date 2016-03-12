@@ -1,7 +1,6 @@
 from datetime import datetime
 from trading.utils.time import stringify
-
-from circuits import Event
+from trading.emitter.component import Event
 
 class BaseEvent(Event):
 

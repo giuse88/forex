@@ -1,5 +1,8 @@
 from abc import ABCMeta, abstractmethod
-from circuits import Component
+from circuits import Component, Event
+from os import getpid
+
+from trading.emitter.component import Component, listen_on
 
 class Strategy(Component):
   __metaclass__ = ABCMeta
@@ -11,7 +14,8 @@ class Strategy(Component):
 class CandleBuilder(Component):
 
   def started(self, *args):
-    print("CandleBuilder started")
+    print("CandleBuilder started [{}]".format(getpid()))
 
-  def tick(self, event):
+  @listen_on('tick')
+  def t(self, *event):
     print("Received tick")

@@ -1,6 +1,4 @@
-from circuits import Component
+from trading.emitter.component import Component
 
 class DataSource(Component):
-  def __init__(self):
-    super(DataSource, self).__init__()
-
+  """ Data Source """
