@@ -35,18 +35,6 @@ class BuyEveryNTicks(Strategy):
             signal = Signal(self.symbol, 'LONG', 0.5)
             self.emit(signal)
 
-class Portafolio(Component, Logger):
-
-    def __init__(self, symbol):
-        super(Portafolio, self).__init__()
-        self.logger.info("Portafolio created")
-        self.symbol = symbol
-
-    @listen_on('signal')
-    def on_signal(self, signal):
-        self.logger.info("Processing " + str(signal))
-        self.emit(Order(self.symbol, 'MKT', 1, 'BUY'))
-
 class Executor(Component, Logger):
 
     def __init__(self):

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-from trading.strategy.strategy import BuyEveryNTicks, Portafolio, Executor
+from trading.portafolio.portafolio import Portafolio
+from trading.strategy.strategy import BuyEveryNTicks, Executor
 from trading.DataSource.CSVTickDataSource import CSVTickDataSource
 
 class BackTest(object):
