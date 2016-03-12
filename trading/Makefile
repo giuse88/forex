@@ -1,4 +1,8 @@
 
+
+backtest: 
+	python ./apps/backtest.py 
+
 test:
 	@green -vv
 

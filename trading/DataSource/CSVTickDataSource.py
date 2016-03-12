@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 import glob, csv, os, time
 
 from trading.utils.validation import isFloat, isValidDate
-from trading.events.event import tick
+from trading.events.event import Tick
 from trading.utils.time import toUTCTimestamp
 from trading.DataSource.DataSource import DataSource
 
@@ -21,7 +21,7 @@ class CSVTickDataSource(DataSource):
     self.file_extension = file_extension
     self.symbol = symbol
 
-  def read_data(self, *args):
+  def read_data(self):
     for csv_path in self._find_csv_files_within_folder():
       with open(csv_path, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
@@ -54,13 +54,13 @@ class CSVTickDataSource(DataSource):
     _tick['bid_volume'] = float(row[CSVTickDataSource.COLUMN_BID_VOLUME])
     _tick['timestamp'] = toUTCTimestamp(row[CSVTickDataSource.COLUMN_TIME])
     _tick['symbol'] = self.symbol
-    return tick(**_tick)
+    return Tick(**_tick)
 
   def _process_row(self, row):
     if(self._validate_row(row)):
       event = self._forge_tick(row)
+      print("Sending :  " + str(event));
       self.emit(event)
-      print("Sent :  " + str(event));
 
 if __name__ == '__main__':
     """ Test csv tick data source with mock data"""

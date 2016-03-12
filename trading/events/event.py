@@ -11,7 +11,7 @@ class BaseEvent(Event):
     def __str__(self):
         return "Base Event"
 
-class tick(BaseEvent):
+class Tick(BaseEvent):
 
   def __init__(self, **args):
       super(BaseEvent, self).__init__()
@@ -24,7 +24,7 @@ class tick(BaseEvent):
       self.symbol = args['symbol']
 
   def __str__(self):
-    return "Tick({:s}): Symbol={:s}, Ask={:.2f} Bid {:.2f} Ask volume {:.2f} Bid volume {:.2f} " \
+    return "Tick({:s}): Symbol={:s}, Ask={:.6f} Bid {:.6f} Ask volume {:.6f} Bid volume {:.6f} " \
             .format(stringify(self.timestamp), self.symbol, self.ask, self.bid, self.ask_volume, self.bid_volume )
 
 class MarketEvent(BaseEvent):
