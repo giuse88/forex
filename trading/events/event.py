@@ -126,6 +126,22 @@ class FillEvent(Event):
         return "Signal: Symbol={:s}, Exchange={:s}, Quantity={:d}, Direction={:s}, Fill cost={:.2f} " \
             .format(self.symbol, self.exchange, self.quantity, self.direction, self.fill_cost)
 
+class Trade(BaseEvent):
+
+    def __init__(self, **args):
+        self.type='TRADE'
+        self.timestamp = args['timestamp']
+        self.symbol = args['symbol']
+        self.fill_price = args['fill_price']
+        self.side = args['side']
+        self.units = args['units']
+        self.commission = args['commission']
+        self.exchange = args['exchange']
+
+    def __str__(self):
+        return "Trade ({:s}) Symbol:{:s} Units:{:d} Fill Price:{:f} Side:{:s} "\
+                .format(stringify(self.timestamp), self.symbol, self.units, self.fill_price, self.side)
+
 
 if __name__ == "__main__":
     event = BaseEvent();

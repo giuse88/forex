@@ -10,7 +10,7 @@ class BackTest(object):
       symbol = 'EURUSD'
       self.source = CSVTickDataSource('../data/', symbol, '*.small.csv')
       self.strategy = BuyEveryNTicks(symbol, 3)
-      self.portafolio = Portafolio(symbol)
+      self.portafolio = Portafolio([symbol], 100000)
       self.executor = Executor()
 
   def start(self):

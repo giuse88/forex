@@ -34,13 +34,3 @@ class BuyEveryNTicks(Strategy):
         if self.tick_counter is 0 :
             signal = Signal(self.symbol, 'LONG', 0.5)
             self.emit(signal)
-
-class Executor(Component, Logger):
-
-    def __init__(self):
-        super(Executor, self).__init__()
-        self.logger.info("Execution handler created")
-
-    @listen_on('order')
-    def on_order(self, order):
-        self.logger.info("Processing: " + str(order))

@@ -1,7 +1,7 @@
 from trading.emitter.component import Component, listen_on
-from trading.events.event import Signal, Order
+from trading.events.event import Signal, Order, Trade
 from trading.utils.logger import Logger
-from trading.utils.time import stringify
+from trading.core import Price
 from decimal import Decimal as D, getcontext
 
 #BID is the sell price
@@ -16,34 +16,16 @@ class Portafolio(Component, Logger):
         self.logger.info("Portafolio created")
         self.symbols = symbols
         self.initial_capital = initial_capital
+        self.positions = []
 
     @listen_on('signal')
     def on_signal(self, signal):
         self.logger.info("Processing " + str(signal))
-        self.emit(Order(self.symbol, 'MKT', 1, 'BUY'))
+        self.emit(Order(signal.symbol, 'MKT', 1, 'BUY'))
 
-    @listen_on('tick')
-    def update_holdings(self, tick):
-        self.logger.info('Updating holding..')
-
-
-class Trade(object):
-
-    def __init__(self, timestamp, symbol, fill_price, units, side):
-        self.timestamp = timestamp
-        self.symbol = symbol
-        self.fill_price = fill_price
-        self.side = side
-        self.units = units
-
-    def __str__(self):
-        return "Trade ({:s}) Symbol:{:s} Units:{:d} Fill Price:{:f} Side:{:s} "\
-                .format(stringify(self.timestamp), self.symbol, self.units, self.fill_price, self.side)
-
-class Price(object):
-    def __init__(self, ask, bid):
-        self.ask = ask
-        self.bid = bid
+    @listen_on('FillEvent')
+    def on_fill_event(self, event):
+        self.logger.info("Processing " + str(event))
 
 class Position(object):
 
@@ -85,12 +67,16 @@ class Position(object):
             return int((D(self.profit) / abs(self.units) / D(0.0001)).to_integral())
         return 0
 
+    @listen_on('tick')
+    def update_holdings(self, tick):
+        if tick.symbol is self.symbol:
+            self.update_current_price(Price(tick.ask, tick.bid))
+
     def update_current_price(self, new_price):
         self.current_price = new_price
         self.recalculate_position()
 
     def add_trade(self, trade):
-
         if self.is_closed():
             raise Exception("Position closed")
         else:

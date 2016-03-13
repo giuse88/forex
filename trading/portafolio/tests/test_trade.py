@@ -7,7 +7,13 @@ from ..portafolio import  Position, Trade
 class TestTrade(unittest.TestCase):
 
     def setUp(self):
-        self.trade = Trade(datetime.utcnow(), 'GDBUSD', 34.56, 1000, 'BUY')
+        self.trade = Trade(timestamp=datetime.utcnow(),
+                symbol='GDBUSD',
+                fill_price=34.56,
+                units=1000,
+                side='BUY',
+                commission=0,
+                exchange='FX')
 
     def test_trade_has_timestamp(self):
         self.assertIsNotNone(self.trade.timestamp)
