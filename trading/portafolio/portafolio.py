@@ -2,7 +2,12 @@ from trading.emitter.component import Component, listen_on
 from trading.events.event import Signal, Order
 from trading.utils.logger import Logger
 from trading.utils.time import stringify
-from decimal import Decimal as D
+from decimal import Decimal as D, getcontext
+
+#BID is the sell price
+#ASK is the buy price
+# ASK > BID
+# EURUSD --> 1.1147 1.1149 spread 2 buy 1.1149 sell 1.1147
 
 class Portafolio(Component, Logger):
 
@@ -11,11 +16,6 @@ class Portafolio(Component, Logger):
         self.logger.info("Portafolio created")
         self.symbols = symbols
         self.initial_capital = initial_capital
-
-        #self.all_positions = self.construct_all_positions()
-        #self.current_positions = dict( (k,v) for k, v in \ [(s, 0) for s in self.symbol_list] )
-        #self.all_holdings = self.construct_all_holdings()
-        #self.current_holdings = self.construct_current_holdings()
 
     @listen_on('signal')
     def on_signal(self, signal):
@@ -51,57 +51,73 @@ class Position(object):
         self.symbol = symbol
         self.trades = []
         self.current_price = current_price
-        self.holding = 0
-        self.exposure = 0
-        self.pips = 0
-        self.total_units = 0
-        self.profit_base = 0
-        self.profit_perc = 0
+        self._reset_fields()
+        self.state = 'INIT'
+
+    def _reset_fields(self):
+        self.units_bought = 0
+        self.units_sold = 0
+        self.amount_bought = D(0)
+        self.amount_sold = D(0)
+
+    @property
+    def units(self):
+        return  self.units_bought - self.units_sold;
+
+    @property
+    def profit(self):
+        return round(self.holding - self.exposure, 4)
+
+    @property
+    def exposure(self):
+        return round(self.amount_bought - self.amount_sold, 4)
+
+    @property
+    def holding(self):
+        if self.units > 0:
+            return round(self.units * self.current_price.bid, 4)
+        else:
+            return round(self.units * self.current_price.ask, 4)
+
+    @property
+    def pips(self):
+        if self.units is not 0:
+            return int((D(self.profit) / abs(self.units) / D(0.0001)).to_integral())
+        return 0
 
     def update_current_price(self, new_price):
         self.current_price = new_price
         self.recalculate_position()
 
     def add_trade(self, trade):
-        self.trades.append(trade)
-        self.recalculate_position()
+
+        if self.is_closed():
+            raise Exception("Position closed")
+        else:
+            self.trades.append(trade)
+            self.recalculate_position()
 
     def recalculate_position(self):
-        self.pips = 0
-        self.units = 0
+        self._reset_fields()
+
         for trade in self.trades:
             if trade.side is 'BUY':
-                self.total_units += trade.units
-                self.exposure = self.exposure + trade.units * trade.fill_price
+                self.units_bought += trade.units
+                self.amount_bought = self.amount_bought + trade.units * trade.fill_price
             elif trade.side is 'SELL':
-                self.total_units -= trade.units
-                self.exposure = self.exposure - trade.units * trade.fill_price
+                self.units_sold += trade.units
+                self.amount_sold = self.amount_sold + trade.units * trade.fill_price
 
-        price = 0
-        if self.total_units > 0:
-            price = self.current_price.ask
+        if self.units == 0 :
+            self.state = 'CLOSED'
         else:
-            price = self.current_price.bid
-
-        self.pips = self.toPip((price * self.total_units) - self.exposure )
-
-    def exposure(self):
-        return self.pips * D(0.0001) * self.units
-
-    def holding(self):
-        if self.units > 0:
-            return self.units * self.current_price.ask
-        else:
-            return self.units * self.current_price.bid
+            self.state = 'OPEN'
 
     def empty(self):
         return len(self.trades) == 0
 
     def is_open(self):
-        return self.units != 0
+        return not self.is_closed()
 
     def is_closed(self):
-        return not self.is_open()
-
-    def toPip(self, value):
-        return int((D(value) / D(self.total_units) / D(0.0001)).to_integral())
+        return self.state == 'CLOSED'
