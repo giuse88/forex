@@ -70,7 +70,7 @@ class Order(Event):
     The order contains a symbol (e.g. GOOG), a type (market or limit),
     """
 
-    def __init__(self, symbol, order_type, quantity, direction):
+    def __init__(self, symbol, order_type, quantity, side):
         """
         Initialises the order type, setting whether it is
         a Market order (’MKT’) or Limit order (’LMT’), has
@@ -86,10 +86,10 @@ class Order(Event):
         self.symbol = symbol
         self.order_type = order_type
         self.quantity = quantity
-        self.direction = direction
+        self.side = side
 
     def __str__(self):
-        return "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % (self.symbol, self.order_type, self.quantity, self.direction)
+        return "Order: Symbol=%s, Type=%s, Quantity=%s, Direction=%s" % (self.symbol, self.order_type, self.quantity, self.side)
 
 class FillEvent(Event):
     """

@@ -10,13 +10,15 @@ class Component(object):
 
     def __init__(self):
         super(Component, self).__init__()
-
         for attr_name in dir(self):
-            method = getattr(self, attr_name)
-            if hasattr(method, EVENT_LIST_IDENTIFIER):
-                for event in method._component_emitter_on:
-                    self._emitter.on(event.lower(), method)
-            self.attr_name = method
+            try:
+                method = getattr(self, attr_name)
+                if hasattr(method, EVENT_LIST_IDENTIFIER):
+                    for event in method._component_emitter_on:
+                        self._emitter.on(event.lower(), method)
+                self.attr_name = method
+            except AttributeError:
+                continue
 
     def emit(self, event):
         event_type = event.__class__.__name__.lower()

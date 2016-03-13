@@ -27,10 +27,11 @@ class BuyEveryNTicks(Strategy):
     def on_tick(self, event):
         self.logger.info("Processing " + str(event))
         if event.symbol is self.symbol:
-            self.tick_counter = ( self.tick_counter + 1 ) % self.ticks
+            self.tick_counter += 1 # ( self.tick_counter + 1 ) % self.ticks
             self.calculate_signals()
 
     def calculate_signals(self):
-        if self.tick_counter is 0 :
+        if self.tick_counter is 5 :
             signal = Signal(self.symbol, 'LONG', 0.5)
             self.emit(signal)
+

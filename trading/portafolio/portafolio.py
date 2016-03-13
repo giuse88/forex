@@ -16,25 +16,30 @@ class Portafolio(Component, Logger):
         self.logger.info("Portafolio created")
         self.symbols = symbols
         self.initial_capital = initial_capital
-        self.positions = []
+        self.positions = { symbol:[Position(symbol, Price())] for symbol in symbols }
 
     @listen_on('signal')
     def on_signal(self, signal):
         self.logger.info("Processing " + str(signal))
-        self.emit(Order(signal.symbol, 'MKT', 1, 'BUY'))
+        self.logger.info("Sending... order event")
+        self.emit(Order(signal.symbol, 'MKT', 10000, 'BUY'))
 
-    @listen_on('FillEvent')
-    def on_fill_event(self, event):
-        self.logger.info("Processing " + str(event))
+    @listen_on('trade')
+    def on_trade(self, trade):
+        positions = self.positions[trade.symbol]
+        positions[0].add_trade(trade)
+        self.logger.info("Updating portafolio with " + str(trade))
 
-class Position(object):
+class Position(Component, Logger):
 
     def __init__(self, symbol, current_price):
+        super(Position, self).__init__()
+        self.amount_bought = D(0)
+        self.state = 'INIT'
         self.symbol = symbol
         self.trades = []
         self.current_price = current_price
         self._reset_fields()
-        self.state = 'INIT'
 
     def _reset_fields(self):
         self.units_bought = 0
@@ -44,7 +49,7 @@ class Position(object):
 
     @property
     def units(self):
-        return  self.units_bought - self.units_sold;
+        return self.units_bought - self.units_sold
 
     @property
     def profit(self):
@@ -57,9 +62,9 @@ class Position(object):
     @property
     def holding(self):
         if self.units > 0:
-            return round(self.units * self.current_price.bid, 4)
+            return round(self.units * D(self.current_price.bid), 4)
         else:
-            return round(self.units * self.current_price.ask, 4)
+            return round(self.units * D(self.current_price.ask), 4)
 
     @property
     def pips(self):
@@ -71,6 +76,7 @@ class Position(object):
     def update_holdings(self, tick):
         if tick.symbol is self.symbol:
             self.update_current_price(Price(tick.ask, tick.bid))
+        self.logger.info(str(self))
 
     def update_current_price(self, new_price):
         self.current_price = new_price
@@ -94,10 +100,10 @@ class Position(object):
                 self.units_sold += trade.units
                 self.amount_sold = self.amount_sold + trade.units * trade.fill_price
 
-        if self.units == 0 :
-            self.state = 'CLOSED'
-        else:
+        if self.state is 'INIT' and self.units is not 0:
             self.state = 'OPEN'
+        elif self.state is 'OPEN' and self.units is 0:
+            self.state = 'CLOSED'
 
     def empty(self):
         return len(self.trades) == 0
@@ -107,3 +113,6 @@ class Position(object):
 
     def is_closed(self):
         return self.state == 'CLOSED'
+
+    def __str__(self):
+        return "Position [{:s}] profit:{} holding:{} pips:{:d} ".format(self.state, str(self.profit), str(self.holding), self.pips)

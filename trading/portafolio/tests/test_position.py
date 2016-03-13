@@ -13,6 +13,7 @@ class TestPosition(unittest.TestCase):
     def setUp(self):
         self.symbol = 'GDBUSD'
         current_price = Price(D(1.1583), D(1.1581))
+
         self.long_trade = Trade(
                 timestamp=datetime.utcnow(),
                 symbol=self.symbol,
@@ -21,6 +22,7 @@ class TestPosition(unittest.TestCase):
                 side='BUY',
                 commission=0,
                 exchange='FX')
+
         self.short_trade = Trade(
                 timestamp=datetime.utcnow(),
                 symbol=self.symbol,
@@ -29,6 +31,7 @@ class TestPosition(unittest.TestCase):
                 side='SELL',
                 commission=0,
                 exchange='FX')
+
         self.position = Position(self.symbol, current_price)
 
     def test_a_new_positioon_is_empty(self):

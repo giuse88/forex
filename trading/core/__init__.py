@@ -19,6 +19,12 @@ class Candle:
         return self.__str__()
 
 class Price(object):
-    def __init__(self, ask, bid):
+    def __init__(self, ask=0, bid=0):
         self.ask = ask
         self.bid = bid
+
+    def __str__(self):
+        return "Ask:{:.6f} Bid:{:.6f}".format(self.ask, self.bid)
+
+    def __repr__(self):
+        return self.__str__()
