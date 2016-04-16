@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 from trading.utils.validation import isFloat, isValidDate
 from trading.events.event import Tick
-from trading.utils.time import toUTCTimestamp
+from trading.utils.time import to_utc_timestamp
 from trading.DataSource.DataSource import DataSource
 from trading.utils.logger import Logger
 

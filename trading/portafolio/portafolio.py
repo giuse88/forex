@@ -22,7 +22,7 @@ class Portafolio(Component, Logger):
     def on_signal(self, signal):
         self.logger.info("Processing " + str(signal))
         self.logger.info("Sending... order event")
-        self.emit(Order(signal.symbol, 'MKT', 10000, 'BUY'))
+        self.emit(Order(signal.symbol, 'MKT', 100000, 'BUY'))
 
     @listen_on('trade')
     def on_trade(self, trade):
